@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 195 53% 94%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 204 70% 53%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 204 64% 8%;
+    --foreground: 210 40% 98%;
+    --card: 204 64% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 204 64% 12%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 204 70% 53%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground pt-20; /* Increased padding-top to account for fixed header with margins */
+    background-image: linear-gradient(to bottom right, #e0f7fa, #bbdefb, #90caf9);
+    transition: background-image 0.5s ease, background-color 0.5s ease, color 0.5s ease;
+  }
+
+  .dark body {
+    background-image: linear-gradient(to bottom right, #0d2b38, #1a5276, #21618c);
+  }
+}
+
+@keyframes rain {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+}
+
+.animate-rain {
+  animation: rain 1.5s infinite;
+}
+
+/* Remove bounce animation from umbrella icon to prevent flickering */
+.animate-bounce {
+  animation: none !important;
+}
+
+/* Dark mode styles for Google Maps */
+.dark .gm-style {
+  filter: invert(90%) hue-rotate(180deg);
+}
+
+.dark .gm-style img,
+.dark .gm-style .gm-style-iw-d {
+  filter: invert(100%) hue-rotate(180deg);
+}
+
+/* Header styles */
+.header-gradient {
+  background: linear-gradient(to right, #87ceeb, #3498db);
+}
+
+.header-glass {
+  background: rgba(52, 152, 219, 0.1); /* Increased transparency (reduced from 0.4 to 0.1) */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background 0.5s ease;
+}
+
+.dark .header-glass {
+  background: rgba(41, 128, 185, 0.1); /* Increased transparency (reduced from 0.4 to 0.1) */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.dark .header-gradient {
+  background: linear-gradient(to right, #1a5276, #2980b9);
+}
+
+/* Card styles with subtle gradient */
+.card-gradient {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  backdrop-filter: blur(10px);
+  transition: background 0.5s ease;
+}
+
+.dark .card-gradient {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.7));
+  backdrop-filter: blur(10px);
+}
+
+/* Theme transition effects */
+.transition-theme {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 500ms;
+}
+
+/* Apply transitions to common elements */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+div,
+button,
+a,
+input,
+textarea,
+select {
+  transition: color 0.5s ease, background-color 0.5s ease, border-color 0.5s ease;
+}
