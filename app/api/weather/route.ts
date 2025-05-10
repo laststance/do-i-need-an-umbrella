@@ -23,18 +23,22 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(`https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=${lat}&lon=${lon}`, {
-      headers: {
-        // Proper User-Agent is required by Met.no API
-        "User-Agent": "WeatherApp/1.0 (https://weather-app.vercel.app; contact@example.com)",
+    // First, try to get location name from Met.no's location forecast API
+    const locationResponse = await fetch(
+      `https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=${lat}&lon=${lon}`,
+      {
+        headers: {
+          // Proper User-Agent is required by Met.no API
+          "User-Agent": "WeatherApp/1.0 (https://weather-app.vercel.app; contact@example.com)",
+        },
       },
-    })
+    )
 
-    if (!response.ok) {
+    if (!locationResponse.ok) {
       // Handle non-JSON responses
-      const text = await response.text()
+      const text = await locationResponse.text()
 
-      if (response.status === 429) {
+      if (locationResponse.status === 429) {
         // Too many requests - return a friendly error
         return NextResponse.json(
           {
@@ -45,18 +49,49 @@ export async function GET(request: NextRequest) {
         )
       }
 
-      throw new Error(`Weather API error: ${response.status} - ${text}`)
+      throw new Error(`Weather API error: ${locationResponse.status} - ${text}`)
     }
 
-    const data = await response.json()
+    const weatherData = await locationResponse.json()
+
+    // Try to get location name from Met.no's geocoder API
+    try {
+      const geocodeResponse = await fetch(`https://api.met.no/weatherapi/geolookup/1.0/?lat=${lat}&lon=${lon}`, {
+        headers: {
+          // Proper User-Agent is required by Met.no API
+          "User-Agent": "WeatherApp/1.0 (https://weather-app.vercel.app; contact@example.com)",
+          Accept: "application/json",
+        },
+      })
+
+      if (geocodeResponse.ok) {
+        const geocodeData = await geocodeResponse.json()
+
+        // Add location information to the weather data
+        if (geocodeData && geocodeData.name) {
+          if (!weatherData.properties) {
+            weatherData.properties = {}
+          }
+
+          weatherData.properties.location = {
+            name: geocodeData.name,
+            country: geocodeData.country,
+            region: geocodeData.region,
+          }
+        }
+      }
+    } catch (geocodeError) {
+      console.error("Error fetching location name from Met.no:", geocodeError)
+      // Continue with weather data even if geocoding fails
+    }
 
     // Cache the response
     cache[cacheKey] = {
-      data,
+      data: weatherData,
       timestamp: Date.now(),
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(weatherData)
   } catch (error) {
     console.error("Error fetching weather data:", error)
 

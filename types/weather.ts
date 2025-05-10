@@ -18,6 +18,11 @@ export interface WeatherData {
       }
     }
     timeseries: TimeSeriesData[]
+    location?: {
+      name?: string
+      country?: string
+      region?: string
+    }
   }
 }
 

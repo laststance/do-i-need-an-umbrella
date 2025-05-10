@@ -1,0 +1,21 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Application Flow
+
+This application follows these main processes:
+
+1. **User Location**: Gets the user's location (either via browser geolocation or user input)
+2. **Weather Data**: Fetches weather data based on the location
+3. **Umbrella Decision**: Determines if an umbrella is needed based on precipitation forecasts
+4. **Display Results**: Shows the user whether they need an umbrella today or tomorrow
+
+## Key Files
+
+- **app/page.tsx**: Main landing page
+- **app/today/page.tsx**: Today's forecast page
+- **app/tomorrow/page.tsx**: Tomorrow's forecast page
+- **app/api/geocode/route.ts**: API route for geocoding
+- **app/api/weather/route.ts**: API route for weather data

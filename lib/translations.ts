@@ -64,6 +64,10 @@ export const translations = {
     clickMapToSelect: "Click on the map to select location",
     myLocation: "My Location",
     mapInstructions: "Click on the map to select a location or drag the marker",
+    todaysWeather: "Today's Weather",
+    tomorrowsWeather: "Tomorrow's Weather",
+    unknownLocation: "Unknown Location",
+    loadingLocation: "Loading location...",
   },
   ja: {
     appName: "傘が必要ですか？",
@@ -130,5 +134,9 @@ export const translations = {
     clickMapToSelect: "地図をクリックして場所を選択",
     myLocation: "現在地",
     mapInstructions: "地図をクリックして場所を選択するか、マーカーをドラッグしてください",
+    todaysWeather: "今日の天気",
+    tomorrowsWeather: "明日の天気",
+    unknownLocation: "不明な場所",
+    loadingLocation: "場所を読み込み中...",
   },
 }

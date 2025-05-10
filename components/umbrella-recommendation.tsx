@@ -87,7 +87,7 @@ export function UmbrellaRecommendation({ className }: UmbrellaRecommendationProp
       </CardHeader>
       <CardContent>
         <div className="flex flex-col items-center justify-center p-6 text-center">
-          <div className={`text-6xl mb-4 ${needsUmbrella ? "text-blue-500" : "text-yellow-500"}`}>
+          <div className={`mb-4 ${needsUmbrella ? "text-6xl text-blue-500" : "text-9xl text-yellow-500"}`}>
             {needsUmbrella ? <Umbrella /> : <Sun />}
           </div>
           <h3 className="text-2xl font-bold mb-2">{needsUmbrella ? t("yesUmbrella") : t("noUmbrella")}</h3>

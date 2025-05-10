@@ -22,6 +22,8 @@ declare global {
   }
 }
 
+let isMapInitialized = false
+
 export function MapSelector({ className }: MapSelectorProps) {
   const { coordinates, setCoordinates } = useLocation()
   const mapRef = useRef<HTMLDivElement>(null)
@@ -63,7 +65,7 @@ export function MapSelector({ className }: MapSelectorProps) {
   }
 
   // Initialize map function that will be called by the Google Maps script
-  window.initMap = () => {
+  typeof window !== "undefined" && isMapInitialized === false && (window.initMap = () => {
     if (!mapRef.current) return
 
     try {
@@ -193,11 +195,12 @@ export function MapSelector({ className }: MapSelectorProps) {
 
       setMap(newMap)
       setMarker(newMarker)
+      isMapInitialized = true
     } catch (error) {
       console.error("Error initializing map:", error)
       setMapError(t("mapInitError"))
     }
-  }
+  })
 
   // Update map style when theme changes
   useEffect(() => {
@@ -304,32 +307,6 @@ export function MapSelector({ className }: MapSelectorProps) {
     }
   }, [])
 
-  // Load Google Maps script
-  useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
-      setMapError("noApiKey")
-      return
-    }
-
-    const script = document.createElement("script")
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&callback=initMap`
-    script.async = true
-    script.defer = true
-
-    script.onerror = () => {
-      setMapError("loadError")
-      console.error("Failed to load Google Maps API")
-    }
-
-    document.head.appendChild(script)
-
-    return () => {
-      // Clean up
-      if (document.head.contains(script)) {
-        document.head.removeChild(script)
-      }
-    }
-  }, [])
 
   // Update map when coordinates change
   useEffect(() => {

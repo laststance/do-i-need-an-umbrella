@@ -119,16 +119,36 @@
   background: linear-gradient(to right, #1a5276, #2980b9);
 }
 
-/* Card styles with subtle gradient */
+/* Card styles with subtle gradient and transparent background */
 .card-gradient {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2));
   backdrop-filter: blur(10px);
   transition: background 0.5s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .dark .card-gradient {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(30, 41, 59, 0.7));
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.3), rgba(30, 41, 59, 0.2));
   backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Apply transparent background to all cards */
+.card {
+  background-color: rgba(255, 255, 255, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.dark .card {
+  background-color: rgba(30, 41, 59, 0.3);
+}
+
+.card:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.dark .card:hover {
+  background-color: rgba(30, 41, 59, 0.5);
 }
 
 /* Theme transition effects */

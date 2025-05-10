@@ -1,0 +1,35 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Component Guide
+
+## Component Organization
+
+This project uses a modular component structure:
+
+- **UI Components**: Reusable, presentational components in `/components/ui`
+- **Page Components**: Main page layouts in each App Router page directory
+- **Feature Components**: Functional components specific to features
+
+## Component Best Practices
+
+1. **Component Naming**:
+   - Use PascalCase for component names
+   - Suffix with purpose (e.g., Button, Card, Form)
+
+2. **Component Structure**:
+   - Use TypeScript interfaces for props
+   - Keep components focused on a single responsibility
+   - Extract complex logic to custom hooks in `/hooks`
+
+3. **Styling**:
+   - Use TailwindCSS classes for styling
+   - Maintain consistent design language
+
+4. **Server vs Client Components**:
+   - Server Components: Data fetching, SEO-critical content
+   - Client Components: Interactive elements, forms, state management
+
+For examples of well-structured components, refer to existing components in the `/components` directory.

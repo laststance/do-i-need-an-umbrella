@@ -1,0 +1,24 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Project Overview
+
+This is a Next.js application (using App Router) that helps users determine if they need an umbrella based on weather conditions.
+
+## Main Structure
+
+- **app/**: Contains the Next.js App Router pages and API routes
+  - **api/**: Backend API endpoints
+    - **geocode/**: Geocoding API for location lookup
+    - **weather/**: Weather data API
+  - **today/**: Today's weather forecast page
+  - **tomorrow/**: Tomorrow's weather forecast page
+- **components/**: Reusable React components
+  - **ui/**: UI component library
+- **hooks/**: Custom React hooks
+- **lib/**: Utility functions and libraries
+- **public/**: Static assets
+- **styles/**: CSS and styling files
+- **types/**: TypeScript type definitions

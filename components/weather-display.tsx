@@ -9,10 +9,10 @@ import { useTranslations } from "@/hooks/use-translations"
 import { fetchWeatherData } from "@/lib/api"
 import type { WeatherData } from "@/types/weather"
 import { formatDate, formatTime } from "@/lib/date-utils"
-import { Cloud, CloudRain, Sun, CloudSun, CloudFog, CloudSnow, Wind } from "lucide-react"
+import { Cloud, CloudRain, Sun, CloudSun, CloudFog, CloudSnow, Wind, MapPin } from "lucide-react"
 
 export function WeatherDisplay() {
-  const { coordinates, isLoading: locationLoading } = useLocation()
+  const { coordinates, isLoading: locationLoading, locationName, isLoadingLocationName } = useLocation()
   const { unit, convertTemperature } = useUnit()
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -75,7 +75,10 @@ export function WeatherDisplay() {
     return (
       <Card className="card-gradient">
         <CardHeader>
-          <CardTitle>{t("currentWeather")}</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>{t("currentWeather")}</span>
+            <Skeleton className="h-6 w-32" />
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4">
@@ -92,7 +95,15 @@ export function WeatherDisplay() {
     return (
       <Card className="card-gradient">
         <CardHeader>
-          <CardTitle>{t("currentWeather")}</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>{t("currentWeather")}</span>
+            {!isLoadingLocationName && (
+              <span className="text-sm flex items-center">
+                <MapPin className="h-4 w-4 mr-1" />
+                {locationName}
+              </span>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="p-4 text-center">
@@ -107,7 +118,15 @@ export function WeatherDisplay() {
     return (
       <Card className="card-gradient">
         <CardHeader>
-          <CardTitle>{t("currentWeather")}</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>{t("currentWeather")}</span>
+            {!isLoadingLocationName && (
+              <span className="text-sm flex items-center">
+                <MapPin className="h-4 w-4 mr-1" />
+                {locationName}
+              </span>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="p-4 text-center">
@@ -128,7 +147,15 @@ export function WeatherDisplay() {
   return (
     <Card className="card-gradient">
       <CardHeader>
-        <CardTitle>{t("currentWeather")}</CardTitle>
+        <CardTitle className="flex items-center justify-between">
+          <span>{t("currentWeather")}</span>
+          {!isLoadingLocationName && (
+            <span className="text-sm flex items-center">
+              <MapPin className="h-4 w-4 mr-1" />
+              {locationName}
+            </span>
+          )}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-6">
