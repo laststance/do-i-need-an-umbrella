@@ -22,8 +22,6 @@ declare global {
   }
 }
 
-let isMapInitialized = false
-
 export function MapSelector({ className }: MapSelectorProps) {
   const { coordinates, setCoordinates } = useLocation()
   const mapRef = useRef<HTMLDivElement>(null)
@@ -33,6 +31,7 @@ export function MapSelector({ className }: MapSelectorProps) {
   const { theme } = useTheme()
   const [map, setMap] = useState<google.maps.Map | null>(null)
   const [marker, setMarker] = useState<google.maps.Marker | null>(null)
+  const initMapRef = useRef(false)
 
   // Get current location
   const getCurrentLocation = () => {
@@ -64,143 +63,170 @@ export function MapSelector({ className }: MapSelectorProps) {
     }
   }
 
-  // Initialize map function that will be called by the Google Maps script
-  typeof window !== "undefined" && isMapInitialized === false && (window.initMap = () => {
-    if (!mapRef.current) return
+  // Initialize Google Maps when API is loaded
+  useEffect(() => {
+    const initializeMap = () => {
+      if (!mapRef.current || !window.google || initMapRef.current) return
 
-    try {
-      setMapLoaded(true)
-      setMapError(null)
+      try {
+        initMapRef.current = true
+        setMapError(null)
 
-      // Map styles for dark mode
-      const darkModeStyle = [
-        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-        {
-          featureType: "administrative.locality",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#d59563" }],
-        },
-        {
-          featureType: "poi",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#d59563" }],
-        },
-        {
-          featureType: "poi.park",
-          elementType: "geometry",
-          stylers: [{ color: "#263c3f" }],
-        },
-        {
-          featureType: "poi.park",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#6b9a76" }],
-        },
-        {
-          featureType: "road",
-          elementType: "geometry",
-          stylers: [{ color: "#38414e" }],
-        },
-        {
-          featureType: "road",
-          elementType: "geometry.stroke",
-          stylers: [{ color: "#212a37" }],
-        },
-        {
-          featureType: "road",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#9ca5b3" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "geometry",
-          stylers: [{ color: "#746855" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "geometry.stroke",
-          stylers: [{ color: "#1f2835" }],
-        },
-        {
-          featureType: "road.highway",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#f3d19c" }],
-        },
-        {
-          featureType: "transit",
-          elementType: "geometry",
-          stylers: [{ color: "#2f3948" }],
-        },
-        {
-          featureType: "transit.station",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#d59563" }],
-        },
-        {
-          featureType: "water",
-          elementType: "geometry",
-          stylers: [{ color: "#17263c" }],
-        },
-        {
-          featureType: "water",
-          elementType: "labels.text.fill",
-          stylers: [{ color: "#515c6d" }],
-        },
-        {
-          featureType: "water",
-          elementType: "labels.text.stroke",
-          stylers: [{ color: "#17263c" }],
-        },
-      ]
+        // Map styles for dark mode
+        const darkModeStyle = [
+          { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+          { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+          { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+          {
+            featureType: "administrative.locality",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+          },
+          {
+            featureType: "poi",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+          },
+          {
+            featureType: "poi.park",
+            elementType: "geometry",
+            stylers: [{ color: "#263c3f" }],
+          },
+          {
+            featureType: "poi.park",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#6b9a76" }],
+          },
+          {
+            featureType: "road",
+            elementType: "geometry",
+            stylers: [{ color: "#38414e" }],
+          },
+          {
+            featureType: "road",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#212a37" }],
+          },
+          {
+            featureType: "road",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#9ca5b3" }],
+          },
+          {
+            featureType: "road.highway",
+            elementType: "geometry",
+            stylers: [{ color: "#746855" }],
+          },
+          {
+            featureType: "road.highway",
+            elementType: "geometry.stroke",
+            stylers: [{ color: "#1f2835" }],
+          },
+          {
+            featureType: "road.highway",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#f3d19c" }],
+          },
+          {
+            featureType: "transit",
+            elementType: "geometry",
+            stylers: [{ color: "#2f3948" }],
+          },
+          {
+            featureType: "transit.station",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#d59563" }],
+          },
+          {
+            featureType: "water",
+            elementType: "geometry",
+            stylers: [{ color: "#17263c" }],
+          },
+          {
+            featureType: "water",
+            elementType: "labels.text.fill",
+            stylers: [{ color: "#515c6d" }],
+          },
+          {
+            featureType: "water",
+            elementType: "labels.text.stroke",
+            stylers: [{ color: "#17263c" }],
+          },
+        ]
 
-      const newMap = new window.google.maps.Map(mapRef.current, {
-        center: { lat: coordinates.latitude, lng: coordinates.longitude },
-        zoom: 10,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-        styles: theme === "dark" ? darkModeStyle : [],
-      })
+        const newMap = new window.google.maps.Map(mapRef.current, {
+          center: { lat: coordinates.latitude, lng: coordinates.longitude },
+          zoom: 10,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+          styles: theme === "dark" ? darkModeStyle : [],
+        })
 
-      const newMarker = new window.google.maps.Marker({
-        position: { lat: coordinates.latitude, lng: coordinates.longitude },
-        map: newMap,
-        draggable: true,
-        animation: window.google.maps.Animation.DROP,
-      })
+        const newMarker = new window.google.maps.Marker({
+          position: { lat: coordinates.latitude, lng: coordinates.longitude },
+          map: newMap,
+          draggable: true,
+          animation: window.google.maps.Animation.DROP,
+        })
 
-      // Handle marker drag
-      newMarker.addListener("dragend", () => {
-        const position = newMarker.getPosition()
-        if (position) {
-          setCoordinates({
-            latitude: position.lat(),
-            longitude: position.lng(),
-          })
-        }
-      })
+        // Handle marker drag
+        newMarker.addListener("dragend", () => {
+          const position = newMarker.getPosition()
+          if (position) {
+            setCoordinates({
+              latitude: position.lat(),
+              longitude: position.lng(),
+            })
+          }
+        })
 
-      // Handle map click
-      newMap.addListener("click", (e: google.maps.MapMouseEvent) => {
-        const position = e.latLng
-        if (position) {
-          newMarker.setPosition(position)
-          setCoordinates({
-            latitude: position.lat(),
-            longitude: position.lng(),
-          })
-        }
-      })
+        // Handle map click
+        newMap.addListener("click", (e: google.maps.MapMouseEvent) => {
+          const position = e.latLng
+          if (position) {
+            newMarker.setPosition(position)
+            setCoordinates({
+              latitude: position.lat(),
+              longitude: position.lng(),
+            })
+          }
+        })
 
-      setMap(newMap)
-      setMarker(newMarker)
-      isMapInitialized = true
-    } catch (error) {
-      console.error("Error initializing map:", error)
-      setMapError(t("mapInitError"))
+        setMap(newMap)
+        setMarker(newMarker)
+        setMapLoaded(true)
+      } catch (error) {
+        console.error("Error initializing map:", error)
+        setMapError(t("mapInitError"))
+      }
     }
-  })
+
+    // Set up the global callback for Google Maps
+    if (typeof window !== "undefined") {
+      window.initMap = initializeMap
+    }
+
+    // Check if Google Maps is already loaded
+    if (window.google && window.google.maps) {
+      initializeMap()
+    }
+
+    // Poll for Google Maps availability
+    const checkGoogleMaps = setInterval(() => {
+      if (window.google && window.google.maps) {
+        clearInterval(checkGoogleMaps)
+        initializeMap()
+      }
+    }, 100)
+
+    return () => {
+      clearInterval(checkGoogleMaps)
+      if (typeof window !== "undefined" && window.initMap) {
+        delete window.initMap
+      }
+    }
+  }, [coordinates, theme, t])
 
   // Update map style when theme changes
   useEffect(() => {
