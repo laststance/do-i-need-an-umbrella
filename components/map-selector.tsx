@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { useLocation } from "@/components/location-provider"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useTranslations } from "@/hooks/use-translations"
@@ -53,6 +53,8 @@ export function MapSelector({ className }: MapSelectorProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null)
   const [marker, setMarker] = useState<google.maps.Marker | null>(null)
   const initMapRef = useRef(false)
+  const scriptLoadedRef = useRef(false)
+  const scriptLoadingRef = useRef(false)
 
   // Get current location
   const getCurrentLocation = () => {
@@ -85,169 +87,261 @@ export function MapSelector({ className }: MapSelectorProps) {
   }
 
   // Initialize Google Maps when API is loaded
+  const initializeMap = useCallback(() => {
+    if (!mapRef.current || !window.google || !window.google.maps || initMapRef.current) {
+      console.log("initializeMap: Skipping initialization", {
+        hasMapRef: !!mapRef.current,
+        hasGoogle: !!window.google,
+        hasGoogleMaps: !!(window.google && window.google.maps),
+        alreadyInit: initMapRef.current
+      })
+      return
+    }
+
+    try {
+      console.log("initializeMap: Starting initialization")
+      initMapRef.current = true
+      setMapError(null)
+
+      // Map styles for dark mode
+      const darkModeStyle = [
+        { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
+        {
+          featureType: "administrative.locality",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "poi",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "geometry",
+          stylers: [{ color: "#263c3f" }],
+        },
+        {
+          featureType: "poi.park",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#6b9a76" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry",
+          stylers: [{ color: "#38414e" }],
+        },
+        {
+          featureType: "road",
+          elementType: "geometry.stroke",
+          stylers: [{ color: "#212a37" }],
+        },
+        {
+          featureType: "road",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#9ca5b3" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry",
+          stylers: [{ color: "#746855" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "geometry.stroke",
+          stylers: [{ color: "#1f2835" }],
+        },
+        {
+          featureType: "road.highway",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#f3d19c" }],
+        },
+        {
+          featureType: "transit",
+          elementType: "geometry",
+          stylers: [{ color: "#2f3948" }],
+        },
+        {
+          featureType: "transit.station",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#d59563" }],
+        },
+        {
+          featureType: "water",
+          elementType: "geometry",
+          stylers: [{ color: "#17263c" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.fill",
+          stylers: [{ color: "#515c6d" }],
+        },
+        {
+          featureType: "water",
+          elementType: "labels.text.stroke",
+          stylers: [{ color: "#17263c" }],
+        },
+      ]
+
+      const newMap = new window.google.maps.Map(mapRef.current, {
+        center: { lat: coordinates.latitude, lng: coordinates.longitude },
+        zoom: 10,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+        zoomControl: true,
+        zoomControlOptions: {
+          position: window.google.maps.ControlPosition.TOP_RIGHT,
+        },
+        styles: theme === "dark" ? darkModeStyle : [],
+      })
+
+      const newMarker = new window.google.maps.Marker({
+        position: { lat: coordinates.latitude, lng: coordinates.longitude },
+        map: newMap,
+        draggable: true,
+        animation: window.google.maps.Animation.DROP,
+      })
+
+      // Handle marker drag
+      newMarker.addListener("dragend", () => {
+        const position = newMarker.getPosition()
+        if (position) {
+          setCoordinates({
+            latitude: position.lat(),
+            longitude: position.lng(),
+          })
+        }
+      })
+
+      // Handle map click
+      newMap.addListener("click", (e: google.maps.MapMouseEvent) => {
+        const position = e.latLng
+        if (position) {
+          newMarker.setPosition(position)
+          setCoordinates({
+            latitude: position.lat(),
+            longitude: position.lng(),
+          })
+        }
+      })
+
+      setMap(newMap)
+      setMarker(newMarker)
+      setMapLoaded(true)
+      console.log("initializeMap: Map initialized successfully")
+    } catch (error) {
+      console.error("Error initializing map:", error)
+      setMapError(t("mapInitError"))
+      initMapRef.current = false // Reset on error to allow retry
+    }
+  }, [coordinates, theme, t, setCoordinates])
+
+  // Load Google Maps API script dynamically
   useEffect(() => {
-    const initializeMap = () => {
-      if (!mapRef.current || !window.google || initMapRef.current) return
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
-      try {
-        initMapRef.current = true
-        setMapError(null)
+    // Check if API key is configured
+    if (!apiKey) {
+      setMapError("noApiKey")
+      console.error("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not configured")
+      return
+    }
 
-        // Map styles for dark mode
-        const darkModeStyle = [
-          { elementType: "geometry", stylers: [{ color: "#242f3e" }] },
-          { elementType: "labels.text.stroke", stylers: [{ color: "#242f3e" }] },
-          { elementType: "labels.text.fill", stylers: [{ color: "#746855" }] },
-          {
-            featureType: "administrative.locality",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#d59563" }],
-          },
-          {
-            featureType: "poi",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#d59563" }],
-          },
-          {
-            featureType: "poi.park",
-            elementType: "geometry",
-            stylers: [{ color: "#263c3f" }],
-          },
-          {
-            featureType: "poi.park",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#6b9a76" }],
-          },
-          {
-            featureType: "road",
-            elementType: "geometry",
-            stylers: [{ color: "#38414e" }],
-          },
-          {
-            featureType: "road",
-            elementType: "geometry.stroke",
-            stylers: [{ color: "#212a37" }],
-          },
-          {
-            featureType: "road",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#9ca5b3" }],
-          },
-          {
-            featureType: "road.highway",
-            elementType: "geometry",
-            stylers: [{ color: "#746855" }],
-          },
-          {
-            featureType: "road.highway",
-            elementType: "geometry.stroke",
-            stylers: [{ color: "#1f2835" }],
-          },
-          {
-            featureType: "road.highway",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#f3d19c" }],
-          },
-          {
-            featureType: "transit",
-            elementType: "geometry",
-            stylers: [{ color: "#2f3948" }],
-          },
-          {
-            featureType: "transit.station",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#d59563" }],
-          },
-          {
-            featureType: "water",
-            elementType: "geometry",
-            stylers: [{ color: "#17263c" }],
-          },
-          {
-            featureType: "water",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#515c6d" }],
-          },
-          {
-            featureType: "water",
-            elementType: "labels.text.stroke",
-            stylers: [{ color: "#17263c" }],
-          },
-        ]
+    // Check if script is already loaded or loading
+    if (scriptLoadedRef.current || scriptLoadingRef.current) {
+      return
+    }
 
-        const newMap = new window.google.maps.Map(mapRef.current, {
-          center: { lat: coordinates.latitude, lng: coordinates.longitude },
-          zoom: 10,
-          mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
-          styles: theme === "dark" ? darkModeStyle : [],
-        })
+    // Check if Google Maps is already available
+    if (window.google && window.google.maps) {
+      scriptLoadedRef.current = true
+      scriptLoadingRef.current = false
+      // If Google Maps is already loaded, trigger initialization via the watch effect
+      // The watch effect will handle initialization when conditions are met
+      return
+    }
 
-        const newMarker = new window.google.maps.Marker({
-          position: { lat: coordinates.latitude, lng: coordinates.longitude },
-          map: newMap,
-          draggable: true,
-          animation: window.google.maps.Animation.DROP,
-        })
-
-        // Handle marker drag
-        newMarker.addListener("dragend", () => {
-          const position = newMarker.getPosition()
-          if (position) {
-            setCoordinates({
-              latitude: position.lat(),
-              longitude: position.lng(),
-            })
+    // Load the script dynamically
+    scriptLoadingRef.current = true
+    const script = document.createElement("script")
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async`
+    script.async = true
+    script.defer = true
+    script.onload = () => {
+      scriptLoadedRef.current = true
+      scriptLoadingRef.current = false
+      // Trigger map initialization after script loads
+      if (window.google && window.google.maps) {
+        // Small delay to ensure everything is ready
+        setTimeout(() => {
+          if (mapRef.current && !initMapRef.current) {
+            // Use a function to get the latest initializeMap
+            const checkAndInit = () => {
+              if (mapRef.current && window.google && window.google.maps && !initMapRef.current) {
+                initializeMap()
+              }
+            }
+            checkAndInit()
           }
-        })
-
-        // Handle map click
-        newMap.addListener("click", (e: google.maps.MapMouseEvent) => {
-          const position = e.latLng
-          if (position) {
-            newMarker.setPosition(position)
-            setCoordinates({
-              latitude: position.lat(),
-              longitude: position.lng(),
-            })
-          }
-        })
-
-        setMap(newMap)
-        setMarker(newMarker)
-        setMapLoaded(true)
-      } catch (error) {
-        console.error("Error initializing map:", error)
-        setMapError(t("mapInitError"))
+        }, 100)
       }
     }
-
-    // Set up the global callback for Google Maps
-    if (typeof window !== "undefined") {
-      window.initMap = initializeMap
+    script.onerror = () => {
+      scriptLoadingRef.current = false
+      setMapError("loadError")
+      console.error("Failed to load Google Maps API script")
     }
 
-    // Check if Google Maps is already loaded
-    if (window.google && window.google.maps) {
-      initializeMap()
-    }
+    document.head.appendChild(script)
 
-    // Poll for Google Maps availability
+    return () => {
+      // Cleanup: remove script if component unmounts
+      if (script.parentNode) {
+        script.parentNode.removeChild(script)
+      }
+    }
+  }, [initializeMap])
+
+  // Watch for Google Maps API availability and initialize map
+  useEffect(() => {
+    // Poll for both Google Maps API and mapRef to be ready
+    let pollCount = 0
+    const maxPolls = 100 // 10 seconds max (100 * 100ms)
     const checkGoogleMaps = setInterval(() => {
-      if (window.google && window.google.maps) {
+      pollCount++
+      const hasGoogle = window.google && window.google.maps
+      const hasMapRef = mapRef.current !== null
+      const canInit = !initMapRef.current
+      
+      console.log(`Watch effect: Poll ${pollCount}`, {
+        hasGoogle,
+        hasMapRef,
+        canInit,
+        alreadyInit: initMapRef.current
+      })
+      
+      if (hasGoogle && hasMapRef && canInit) {
+        console.log("Watch effect: All conditions met, initializing map")
         clearInterval(checkGoogleMaps)
         initializeMap()
+      } else if (pollCount >= maxPolls) {
+        clearInterval(checkGoogleMaps)
+        if (!hasGoogle) {
+          setMapError("loadError")
+          console.error("Google Maps API failed to load within timeout period")
+        } else if (!hasMapRef) {
+          console.error("Map container ref not available within timeout period")
+        }
       }
     }, 100)
 
     return () => {
       clearInterval(checkGoogleMaps)
-      if (typeof window !== "undefined" && window.initMap) {
-        delete window.initMap
-      }
     }
-  }, [coordinates, theme, t])
+  }, [initializeMap])
 
   // Update map style when theme changes
   useEffect(() => {
@@ -414,10 +508,10 @@ export function MapSelector({ className }: MapSelectorProps) {
         <CardTitle className="text-base">{t("selectLocation")}</CardTitle>
       </CardHeader>
       <CardContent className="p-0 pb-2">
-        {mapLoaded && !mapError ? (
-          <div className="relative">
-            <div ref={mapRef} className="h-[250px] w-full" />
-            <div className="absolute bottom-2 right-2">
+        <div className="relative">
+          <div ref={mapRef} className="h-[350px] w-full" />
+          {mapLoaded && !mapError ? (
+            <div className="absolute bottom-6 right-16">
               <Button
                 size="sm"
                 variant="secondary"
@@ -428,10 +522,12 @@ export function MapSelector({ className }: MapSelectorProps) {
                 {t("myLocation")}
               </Button>
             </div>
-          </div>
-        ) : (
-          renderFallback()
-        )}
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              {renderFallback()}
+            </div>
+          )}
+        </div>
       </CardContent>
       <CardContent className="px-3 py-2">
         <div className="space-y-4">

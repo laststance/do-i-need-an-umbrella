@@ -17,7 +17,7 @@ export default function Home() {
 
       {/* Full width map selector */}
       <div className="w-full">
-        <MapSelector className="h-[400px] rounded-xl overflow-hidden w-full" />
+        <MapSelector className="rounded-xl w-full" />
       </div>
     </div>
   )
