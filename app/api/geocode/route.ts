@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { env } from "@/env"
 
 // Simple in-memory cache
 const cache: Record<string, { data: any; timestamp: number }> = {}
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=${lang}&result_type=locality|administrative_area_level_1|country`,
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&language=${lang}&result_type=locality|administrative_area_level_1|country`,
     )
 
     if (!response.ok) {

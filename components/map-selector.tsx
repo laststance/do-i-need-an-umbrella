@@ -8,6 +8,7 @@ import { MapPin, Navigation, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useTheme } from "next-themes"
+import { env } from "@/env"
 
 interface MapSelectorProps {
   className?: string
@@ -241,14 +242,7 @@ export function MapSelector({ className }: MapSelectorProps) {
 
   // Load Google Maps API script dynamically
   useEffect(() => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-
-    // Check if API key is configured
-    if (!apiKey) {
-      setMapError("noApiKey")
-      console.error("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not configured")
-      return
-    }
+    const apiKey = env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
 
     // Check if script is already loaded or loading
     if (scriptLoadedRef.current || scriptLoadingRef.current) {
