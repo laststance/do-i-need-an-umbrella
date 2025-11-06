@@ -13,12 +13,33 @@ interface MapSelectorProps {
   className?: string
 }
 
-// Declare google variable to prevent Typescript errors
+// Declare Google Maps types and window extensions
 declare global {
   interface Window {
-    google: any
-    gm_authFailure: () => void
-    initMap: () => void
+    google?: any
+    gm_authFailure?: () => void
+    initMap?: () => void
+  }
+
+  namespace google {
+    namespace maps {
+      class Map {
+        constructor(mapDiv: Element | null, opts?: any)
+        setCenter(latLng: any): void
+        setOptions(options: any): void
+        addListener(eventName: string, handler: Function): void
+      }
+
+      class Marker {
+        constructor(opts?: any)
+        setPosition(latLng: any): void
+        setMap(map: Map | null): void
+      }
+
+      interface MapMouseEvent {
+        latLng: any
+      }
+    }
   }
 }
 
