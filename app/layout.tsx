@@ -6,6 +6,7 @@ import { LanguageProvider } from "@/components/language-provider"
 import { UnitProvider } from "@/components/unit-provider"
 import { LocationProvider } from "@/components/location-provider"
 import Header from "@/components/header"
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "Do I need umbrella?",
@@ -33,6 +34,7 @@ export default function RootLayout({
             </UnitProvider>
           </LanguageProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
