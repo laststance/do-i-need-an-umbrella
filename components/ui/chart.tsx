@@ -2,25 +2,9 @@
 
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
+import type { TooltipPayloadEntry, LegendPayload } from "recharts"
 
 import { cn } from "@/lib/utils"
-
-// Define payload types for recharts components
-type TooltipPayloadItem = {
-  name?: string
-  value?: number | string
-  dataKey?: string | number
-  color?: string
-  payload?: Record<string, unknown>
-  fill?: string
-}
-
-type LegendPayloadItem = {
-  value?: string | number
-  dataKey?: string | number
-  color?: string
-  type?: string
-}
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
@@ -128,14 +112,7 @@ const ChartTooltipContent = React.forwardRef<
       indicator?: "line" | "dot" | "dashed"
       nameKey?: string
       labelKey?: string
-      payload?: Array<{
-        name?: string
-        value?: number | string
-        dataKey?: string
-        color?: string
-        payload?: Record<string, unknown>
-        fill?: string
-      }>
+      payload?: TooltipPayloadEntry[]
       label?: string
     }
 >(
@@ -218,7 +195,7 @@ const ChartTooltipContent = React.forwardRef<
 
             return (
               <div
-                key={item.dataKey}
+                key={String(item.dataKey)}
                 className={cn(
                   "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                   indicator === "dot" && "items-center"
@@ -288,7 +265,7 @@ const ChartLegend = RechartsPrimitive.Legend
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> & {
-    payload?: LegendPayloadItem[]
+    payload?: LegendPayload[]
     verticalAlign?: "top" | "bottom"
     hideIcon?: boolean
     nameKey?: string
@@ -313,7 +290,7 @@ const ChartLegendContent = React.forwardRef<
           className
         )}
       >
-        {payload.map((item: LegendPayloadItem) => {
+        {payload.map((item: LegendPayload) => {
           const key = `${nameKey || item.dataKey || "value"}`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
 
