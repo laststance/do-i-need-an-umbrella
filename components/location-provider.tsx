@@ -60,7 +60,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           setIsLoading(false)
           coordinatesInitializedRef.current = true
           return
-        } catch (e) {
+        } catch {
           // If parsing fails, continue to geolocation
           localStorage.removeItem("weatherCoordinates")
         }
